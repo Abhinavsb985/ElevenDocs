@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Changes - ElevenDocs</title>
+  <style>
+    body {
+      background-color: #0f1117;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      height: 100vh;
+      flex-direction: column;
+      padding: 40px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    p {
+      color: #aaa;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      background: #0f1117; /* Darker background */
+      border: 2px solid #1a1a1a; /* Darker border */
+      border-radius: 25px;
+      padding: 8px 12px;
+      transition: all 0.3s ease;
+      width: 350px; /* default width */
+    }
+
+    .search-container:focus-within {
+      width: 750px; /* expands like ChatGPT */
+      border-color: #2d2d2d; /* Darker focus border */
+      box-shadow: 0 0 10px rgba(45, 45, 45, 0.5); /* Darker glow */
+    }
+
+    .search-bar {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #e0e0e0; /* Lighter text for dark background */
+      font-size: 16px;
+      caret-color: #4a9eff; /* Brighter cursor color */
+    }
+
+    .search-bar::placeholder {
+      color: #666; /* Darker placeholder */
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    .icon-btn {
+      background: #2d2d2d; /* Darker button background */
+      border: none;
+      padding: 10px 14px;
+      border-radius: 50%;
+      color: #e0e0e0; /* Lighter icon color */
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-left: 8px;
+    }
+
+    .icon-btn:hover {
+      background: #404040; /* Darker hover state */
+    }
+
+    .test-info {
+      background: #1a1a1a;
+      border: 1px solid #2d2d2d;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      max-width: 750px;
+    }
+
+    .test-info h3 {
+      color: #4a9eff;
+      margin-top: 0;
+    }
+
+    .test-info ul {
+      color: #e0e0e0;
+    }
+
+    .test-info li {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>✅ Changes Applied Successfully!</h1>
+  <p>This page confirms that the dark theme and left alignment are working.</p>
+
+  <div class="search-container">
+    <input type="text" class="search-bar" placeholder="Test the dark search bar..." />
+    <button class="icon-btn" title="Test button">➤</button>
+  </div>
+
+  <div class="test-info">
+    <h3>What you should see:</h3>
+    <ul>
+      <li>✅ Dark background (#0f1117) instead of lighter gray</li>
+      <li>✅ Darker border (#1a1a1a) instead of blue</li>
+      <li>✅ All text aligned to the left instead of centered</li>
+      <li>✅ Darker button colors (#2d2d2d) instead of blue</li>
+      <li>✅ Lighter text color (#e0e0e0) for better contrast</li>
+      <li>✅ Search bar expands to 750px when focused</li>
+    </ul>
+  </div>
+
+  <p style="margin-top: 20px; color: #888; font-size: 14px; text-align: left;">
+    If you can see these changes, then the dark theme and left alignment are working correctly!
+  </p>
+</body>
+</html>

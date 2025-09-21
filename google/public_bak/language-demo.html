@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Language Switcher Demo</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; padding: 24px; line-height: 1.5; }
+    .container { max-width: 800px; margin: 0 auto; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid #ddd; }
+    h1 { font-size: 1.5rem; margin: 0; }
+    select { padding: 8px 10px; border-radius: 8px; border: 1px solid #ccc; min-width: 180px; }
+    main { padding-top: 20px; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin: 12px 0; }
+    .muted { color: #6b7280; font-size: 0.95rem; }
+    .btn { display: inline-block; padding: 10px 14px; background: #111827; color: #fff; border-radius: 8px; border: none; cursor: pointer; }
+    .btn:active { transform: translateY(1px); }
+    footer { margin-top: 24px; color: #6b7280; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 data-i18n="appTitle">My Website</h1>
+      <label>
+        <span class="muted" data-i18n="chooseLanguageLabel">Language:</span>
+        <select id="languageSelect" aria-label="Choose language">
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="hi">हिन्दी</option>
+        </select>
+      </label>
+    </header>
+
+    <main>
+      <p class="muted" data-i18n="intro">Welcome! This page demonstrates a lightweight language switcher.</p>
+
+      <div class="card">
+        <h2 data-i18n="sectionTitle">Getting Started</h2>
+        <ol>
+          <li data-i18n="featureAuto">Auto-detects your browser language on first visit.</li>
+          <li data-i18n="featureManual">Manually switch languages anytime from the dropdown.</li>
+          <li data-i18n="featurePersist">Your choice is saved for next time using localStorage.</li>
+          <li data-i18n="featureFallback">Missing strings fall back to English.</li>
+        </ol>
+        <button class="btn" id="ctaBtn" data-i18n="cta">Get Started</button>
+      </div>
+
+      <div class="card">
+        <p data-i18n="sampleParagraph">
+          This is some sample content that will change based on the selected language.
+        </p>
+      </div>
+    </main>
+
+    <footer>
+      <span data-i18n="footerNote">Tip: Try changing your browser language and reloading (first visit only).</span>
+    </footer>
+  </div>
+
+  <script>
+    // Translations dictionary (can be split into JSON files if preferred)
+    const TRANSLATIONS = {
+      en: {
+        appTitle: "My Website",
+        chooseLanguageLabel: "Language:",
+        intro: "Welcome! This page demonstrates a lightweight language switcher.",
+        sectionTitle: "Getting Started",
+        featureAuto: "Auto-detects your browser language on first visit.",
+        featureManual: "Manually switch languages anytime from the dropdown.",
+        featurePersist: "Your choice is saved for next time using localStorage.",
+        featureFallback: "Missing strings fall back to English.",
+        cta: "Get Started",
+        sampleParagraph: "This is some sample content that will change based on the selected language.",
+        footerNote: "Tip: Try changing your browser language and reloading (first visit only).",
+      },
+      es: {
+        appTitle: "Mi Sitio Web",
+        chooseLanguageLabel: "Idioma:",
+        intro: "¡Bienvenido! Esta página demuestra un cambiador de idioma ligero.",
+        sectionTitle: "Primeros Pasos",
+        featureAuto: "Detecta automáticamente el idioma del navegador en la primera visita.",
+        featureManual: "Cambia el idioma manualmente en cualquier momento desde el menú.",
+        featurePersist: "Tu elección se guarda para la próxima vez usando localStorage.",
+        featureFallback: "Si faltan traducciones, se usará el inglés por defecto.",
+        cta: "Comenzar",
+        sampleParagraph: "Este es un contenido de ejemplo que cambiará según el idioma seleccionado.",
+        footerNote: "Consejo: Prueba a cambiar el idioma del navegador y recargar (solo primera visita).",
+      },
+      hi: {
+        appTitle: "मेरा वेबसाइट",
+        chooseLanguageLabel: "भाषा:",
+        intro: "स्वागत है! यह पेज एक सरल भाषा बदलने वाला डेमो दिखाता है।",
+        sectionTitle: "शुरुआत करें",
+        featureAuto: "पहली बार विज़िट पर ब्राउज़र भाषा अपने आप पहचानता है।",
+        featureManual: "किसी भी समय ड्रॉपडाउन से भाषा बदल सकते हैं।",
+        featurePersist: "आपकी पसंद localStorage में सेव रहती है।",
+        featureFallback: "ट्रांसलेशन न मिलने पर अंग्रेज़ी का उपयोग होगा।",
+        cta: "शुरू करें",
+        sampleParagraph: "यह कुछ उदाहरण सामग्री है जो चुनी हुई भाषा के अनुसार बदल जाएगी।",
+        footerNote: "टिप: अपने ब्राउज़र की भाषा बदलकर रीफ़्रेश करें (सिर्फ पहली विज़िट पर)।",
+      },
+    };
+
+    const SUPPORTED = Object.keys(TRANSLATIONS);
+    const DEFAULT_LANG = 'en';
+    const STORAGE_KEY = 'site_language';
+
+    function normalizeLang(lang) {
+      if (!lang) return DEFAULT_LANG;
+      const lower = lang.toLowerCase();
+      // Exact match (en, es, hi)
+      if (SUPPORTED.includes(lower)) return lower;
+      // Reduce locales like en-US -> en
+      const base = lower.split('-')[0];
+      return SUPPORTED.includes(base) ? base : DEFAULT_LANG;
+    }
+
+    function getInitialLanguage() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) return normalizeLang(saved);
+      const browser = navigator.language || navigator.userLanguage;
+      return normalizeLang(browser);
+    }
+
+    function t(key, lang) {
+      const dict = TRANSLATIONS[lang] || TRANSLATIONS[DEFAULT_LANG];
+      if (key in dict) return dict[key];
+      // Fallback to English if missing
+      return TRANSLATIONS[DEFAULT_LANG][key] || key;
+    }
+
+    function applyTranslations(lang) {
+      document.documentElement.lang = lang;
+      const nodes = document.querySelectorAll('[data-i18n]');
+      nodes.forEach(node => {
+        const key = node.getAttribute('data-i18n');
+        const value = t(key, lang);
+        if (node.placeholder !== undefined && node.tagName === 'INPUT') {
+          node.placeholder = value;
+        } else {
+          node.textContent = value;
+        }
+      });
+      const select = document.getElementById('languageSelect');
+      if (select && select.value !== lang) select.value = lang;
+    }
+
+    function setLanguage(lang) {
+      const normalized = normalizeLang(lang);
+      localStorage.setItem(STORAGE_KEY, normalized);
+      applyTranslations(normalized);
+    }
+
+    // Init
+    (function init() {
+      const initial = getInitialLanguage();
+      applyTranslations(initial);
+      const select = document.getElementById('languageSelect');
+      select.value = initial;
+      select.addEventListener('change', (e) => setLanguage(e.target.value));
+      document.getElementById('ctaBtn').addEventListener('click', () => alert(t('cta', localStorage.getItem(STORAGE_KEY) || initial)));
+    })();
+  </script>
+</body>
+</html>
