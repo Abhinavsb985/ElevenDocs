@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ElevenDocs - Programmatic Search</title>
+  <style>
+    body {
+      background-color: #0f1117;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      height: 100vh;
+      flex-direction: column;
+      padding: 40px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    p {
+      color: #aaa;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      background: #0f1117; /* Darker background */
+      border: 2px solid #1a1a1a; /* Darker border */
+      border-radius: 25px;
+      padding: 8px 12px;
+      transition: all 0.3s ease;
+      width: 350px; /* default width */
+    }
+
+    .search-container:focus-within {
+      width: 750px; /* expands like ChatGPT */
+      border-color: #2d2d2d; /* Darker focus border */
+      box-shadow: 0 0 10px rgba(45, 45, 45, 0.5); /* Darker glow */
+    }
+
+    .search-bar {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #e0e0e0; /* Lighter text for dark background */
+      font-size: 16px;
+      caret-color: #4a9eff; /* Brighter cursor color */
+    }
+
+    .search-bar::placeholder {
+      color: #666; /* Darker placeholder */
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    .icon-btn {
+      background: #2d2d2d; /* Darker button background */
+      border: none;
+      padding: 10px 14px;
+      border-radius: 50%;
+      color: #e0e0e0; /* Lighter icon color */
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-left: 8px;
+    }
+
+    .icon-btn:hover {
+      background: #404040; /* Darker hover state */
+    }
+
+    .icon-btn:disabled {
+      background: #1a1a1a;
+      cursor: not-allowed;
+      color: #666;
+    }
+
+    .file-preview {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #0f1117; /* Darker background */
+      border: 1px solid #1a1a1a; /* Dark border */
+      border-radius: 8px;
+      display: none;
+    }
+
+    .file-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1a1a1a; /* Darker file item background */
+      border: 1px solid #2d2d2d; /* Dark border */
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin: 4px;
+      font-size: 14px;
+    }
+
+    .file-remove {
+      background: none;
+      border: none;
+      color: #666; /* Darker remove button */
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .file-remove:hover {
+      color: #ff6b6b;
+    }
+
+    .response-area {
+      margin-top: 20px;
+      padding: 20px;
+      background: #0f1117; /* Darker background */
+      border: 1px solid #1a1a1a; /* Dark border */
+      border-radius: 8px;
+      max-width: 750px;
+      display: none;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to ElevenDocs</h1>
+  <p>AI-powered legal document analysis at your fingertips</p>
+
+  <!-- File Preview Area -->
+  <div id="filePreview" class="file-preview">
+    <div style="margin-bottom: 12px;">
+      <span style="font-weight: 500; color: #ccc;">Selected Files:</span>
+    </div>
+    <div id="fileList"></div>
+  </div>
+
+  <!-- Search Container -->
+  <div class="search-container">
+    <input type="text" id="searchInput" class="search-bar" placeholder="Ask ElevenDocs or upload..." />
+    <button id="fileBtn" class="icon-btn" title="Attach file">📎</button>
+    <button id="searchBtn" class="icon-btn" title="Search">➤</button>
+  </div>
+
+  <input type="file" id="fileInput" multiple accept=".pdf,.txt,.doc,.docx,.png,.jpg,.jpeg" style="display: none;" />
+
+  <!-- Response Area -->
+  <div id="responseArea" class="response-area">
+    <h3 style="margin-top: 0; color: #3b82f6;">AI Response:</h3>
+    <div id="responseText"></div>
+  </div>
+
+  <p style="margin-top:20px; color:#888; font-size:14px;">
+    ElevenDocs can analyze legal documents. Always consult with a qualified attorney for legal advice.
+  </p>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const fileBtn = document.getElementById('fileBtn');
+    const searchBtn = document.getElementById('searchBtn');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const fileList = document.getElementById('fileList');
+    const responseArea = document.getElementById('responseArea');
+    const responseText = document.getElementById('responseText');
+
+    let uploadedFiles = [];
+
+    // File handling
+    fileBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      uploadedFiles = [...uploadedFiles, ...files];
+      updateFilePreview();
+    });
+
+    function updateFilePreview() {
+      if (uploadedFiles.length === 0) {
+        filePreview.style.display = 'none';
+        return;
+      }
+
+      filePreview.style.display = 'block';
+      fileList.innerHTML = uploadedFiles.map((file, index) => `
+        <div class="file-item">
+          <span>${file.name}</span>
+          <span style="color: #888; font-size: 12px;">(${(file.size / 1024).toFixed(1)} KB)</span>
+          <button class="file-remove" onclick="removeFile(${index})">×</button>
+        </div>
+      `).join('');
+    }
+
+    function removeFile(index) {
+      uploadedFiles.splice(index, 1);
+      updateFilePreview();
+    }
+
+    // Search functionality
+    searchBtn.addEventListener('click', handleSearch);
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        handleSearch();
+      }
+    });
+
+    async function handleSearch() {
+      const query = searchInput.value.trim();
+      if (!query && uploadedFiles.length === 0) return;
+
+      // Show loading state
+      searchBtn.innerHTML = '<div class="loading"></div>';
+      searchBtn.disabled = true;
+      fileBtn.disabled = true;
+      searchInput.disabled = true;
+
+      try {
+        let response;
+        
+        if (uploadedFiles.length > 0) {
+          // Handle file upload
+          const formData = new FormData();
+          formData.append('input', query || 'Please analyze this document');
+          
+          for (const file of uploadedFiles) {
+            const fileType = file.type.split('/')[1] || 
+                            file.name.split('.').pop()?.toLowerCase() || 'txt';
+            formData.append('file_data', file);
+            formData.append('file_type', fileType);
+          }
+
+          response = await fetch('http://127.0.0.1:8002/invoke', {
+            method: 'POST',
+            body: formData
+          });
+        } else {
+          // Handle text-only message
+          response = await fetch('http://127.0.0.1:8002/invoke', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text: query })
+          });
+        }
+
+        if (!response.ok) {
+          throw new Error('Request failed');
+        }
+
+        const data = await response.json();
+        const result = data.response || data.output || 'No response from agent';
+        
+        // Display result
+        responseArea.style.display = 'block';
+        responseText.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit;">${result}</pre>`;
+        
+        // Clear inputs
+        searchInput.value = '';
+        uploadedFiles = [];
+        updateFilePreview();
+        
+      } catch (error) {
+        console.error('Search error:', error);
+        responseArea.style.display = 'block';
+        responseText.innerHTML = '<p style="color: #ff6b6b;">Error: Unable to process your request. Please try again.</p>';
+      } finally {
+        // Reset button state
+        searchBtn.innerHTML = '➤';
+        searchBtn.disabled = false;
+        fileBtn.disabled = false;
+        searchInput.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

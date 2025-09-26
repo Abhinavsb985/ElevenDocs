@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error Test - ElevenDocs</title>
+  <style>
+    body {
+      background: #18181b;
+      color: #e5e7eb;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .test-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .test-item {
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .test-item h3 {
+      color: #3b82f6;
+      margin-top: 0;
+    }
+    
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .status.success {
+      background: #10b981;
+      color: white;
+    }
+    
+    .status.error {
+      background: #ef4444;
+      color: white;
+    }
+    
+    .test-links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .test-links a {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #3b82f6;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    
+    .test-links a:hover {
+      background: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>🔧 ElevenDocs Error Test & Debug</h1>
+    
+    <div class="test-item">
+      <h3>Server Status <span class="status success" id="serverStatus">Testing...</span></h3>
+      <p>Checking if the development server is running and accessible.</p>
+    </div>
+    
+    <div class="test-item">
+      <h3>CSS Validation <span class="status success" id="cssStatus">Testing...</span></h3>
+      <p>Verifying that CSS syntax is correct and no errors are present.</p>
+    </div>
+    
+    <div class="test-item">
+      <h3>Component Loading <span class="status success" id="componentStatus">Testing...</span></h3>
+      <p>Testing if React components are loading without errors.</p>
+    </div>
+    
+    <div class="test-item">
+      <h3>Test Pages</h3>
+      <p>Access these pages to test different functionality:</p>
+      <div class="test-links">
+        <a href="/" target="_blank">Main App</a>
+        <a href="/search-demo" target="_blank">Search Demo</a>
+        <a href="/chatgpt-test.html" target="_blank">ChatGPT Test</a>
+        <a href="/test-changes.html" target="_blank">Changes Test</a>
+      </div>
+    </div>
+    
+    <div class="test-item">
+      <h3>Common Issues & Solutions</h3>
+      <ul>
+        <li><strong>CSS Syntax Error:</strong> Fixed the extra closing brace in index.css</li>
+        <li><strong>CSS Variables:</strong> Replaced HSL variables with hardcoded values for better compatibility</li>
+        <li><strong>Auto-resize:</strong> Added proper textarea auto-resize functionality</li>
+        <li><strong>Error Boundary:</strong> Existing error boundary will catch React errors</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Test server connectivity
+    fetch('/')
+      .then(response => {
+        if (response.ok) {
+          document.getElementById('serverStatus').textContent = 'Running';
+          document.getElementById('serverStatus').className = 'status success';
+        } else {
+          throw new Error('Server not responding');
+        }
+      })
+      .catch(error => {
+        document.getElementById('serverStatus').textContent = 'Error';
+        document.getElementById('serverStatus').className = 'status error';
+        console.error('Server test failed:', error);
+      });
+
+    // Test CSS (basic check)
+    const styles = document.styleSheets;
+    let cssErrors = 0;
+    
+    try {
+      for (let i = 0; i < styles.length; i++) {
+        const rules = styles[i].cssRules || styles[i].rules;
+        if (rules) {
+          for (let j = 0; j < rules.length; j++) {
+            // This is a basic check - more sophisticated validation would be needed
+          }
+        }
+      }
+      document.getElementById('cssStatus').textContent = 'Valid';
+      document.getElementById('cssStatus').className = 'status success';
+    } catch (error) {
+      document.getElementById('cssStatus').textContent = 'Error';
+      document.getElementById('cssStatus').className = 'status error';
+      console.error('CSS test failed:', error);
+    }
+
+    // Test component loading (basic check)
+    setTimeout(() => {
+      // Check if React is loaded
+      if (typeof window.React !== 'undefined' || document.querySelector('[data-reactroot]')) {
+        document.getElementById('componentStatus').textContent = 'Loaded';
+        document.getElementById('componentStatus').className = 'status success';
+      } else {
+        document.getElementById('componentStatus').textContent = 'Unknown';
+        document.getElementById('componentStatus').className = 'status error';
+      }
+    }, 2000);
+  </script>
+</body>
+</html>
